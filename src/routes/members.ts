@@ -8,6 +8,7 @@ import { Event, IEventModel } from '../models/event';
 import { Location } from '../models/location';
 import { Permission } from '../models/permission';
 import { Job } from '../models/job';
+import { logger } from '../utils/logger';
 import { auth, hasPermissions } from '../middleware/passport';
 import {
 	successRes,
@@ -59,7 +60,7 @@ export const router = express.Router();
 // 			pages: paginate.getArrayPages(req)(5, pageCount, req.query.page)
 // 		});
 // 	} catch (error) {
-// 		console.error(error);
+// 		logger.error(error);
 // 		return errorRes(res, 500, error);
 // 	}
 // });
@@ -94,7 +95,7 @@ router.get('/', async (req, res) => {
 
 		return successRes(res, { members: results });
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error);
 	}
 });
@@ -223,7 +224,7 @@ router.put('/:id', auth(), multer.any(), async (req, res) => {
 		delete m.password;
 		return successRes(res, m);
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error.message);
 	}
 });
@@ -256,7 +257,7 @@ router.post(
 
 			return successRes(res, { member: m, permissions: p });
 		} catch (error) {
-			console.error(error);
+			logger.error(error);
 			return errorRes(res, 500, error);
 		}
 	}
@@ -335,7 +336,7 @@ router.delete('/:id', auth(), hasPermissions(['admin']), async (req, res) => {
 
 		return successRes(res, member);
 	} catch (error) {
-		console.error('Error:', error);
+		logger.error('Error:', error);
 		return errorRes(res, 500, error);
 	}
 });
@@ -358,7 +359,7 @@ router.get('/:id/events', async (req, res) => {
 			: [];
 		return successRes(res, publicEvents);
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error);
 	}
 });
@@ -378,7 +379,7 @@ router.get('/:id/locations', async (req, res) => {
 		const { locations } = member;
 		return successRes(res, locations || []);
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error);
 	}
 });
@@ -390,7 +391,7 @@ router.get('/:id/jobs', async (req, res) => {
 			.exec();
 		return successRes(res, jobs);
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error);
 	}
 });

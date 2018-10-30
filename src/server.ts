@@ -20,6 +20,7 @@ import { router as credentials } from './routes/credentials';
 import { router as permissions } from './routes/permissions';
 import { router as autocomplete } from './routes/autocomplete';
 import { errorRes } from './utils';
+import { logger as winston } from './utils/logger';
 const { NODE_ENV, DB } = CONFIG;
 
 export default class Server {
@@ -75,7 +76,7 @@ export default class Server {
 
 		// Any unhandled errors will be caught in this middleware
 		this.app.use((err, req, res, next) => {
-			console.error('Caught error:', err.message);
+			winston.error('Caught error:', err.message);
 			errorRes(res, 500, err.message);
 		});
 	}
@@ -87,10 +88,10 @@ export default class Server {
 				{ useNewUrlParser: true }
 			);
 			this.mongoose.Promise = Promise;
-			console.log('Connected to Mongo:', DB);
+			winston.log('Connected to Mongo:', DB);
 			return this.mongoose;
 		} catch (error) {
-			console.error('Error connecting to mongo:', error);
+			winston.error('Error connecting to mongo:', error);
 			throw error;
 		}
 	}

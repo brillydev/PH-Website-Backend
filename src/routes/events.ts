@@ -5,6 +5,7 @@ import { ObjectId } from 'mongodb';
 import { Event } from '../models/event';
 import { Member, IMemberModel } from '../models/member';
 import { auth, hasPermissions } from '../middleware/passport';
+import { logger } from '../utils/logger';
 import {
 	successRes,
 	errorRes,
@@ -45,7 +46,7 @@ router.get('/', async (req, res, next) => {
 			events: results
 		});
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error);
 	}
 });
@@ -75,7 +76,7 @@ router.post('/', auth(), hasPermissions(['events']), async (req, res) => {
 		await event.save();
 		return successRes(res, event.toJSON());
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error);
 	}
 });
@@ -218,7 +219,7 @@ router.post('/:id/checkin', async (req, res, next) => {
 
 		return successRes(res, event);
 	} catch (error) {
-		console.error('Error:', error);
+		logger.error('Error:', error);
 		return errorRes(res, 500, error);
 	}
 });
@@ -249,7 +250,7 @@ router.delete('/:id/checkin/:memberID', async (req, res, next) => {
 
 		return successRes(res, event);
 	} catch (error) {
-		console.error('Error:', error);
+		logger.error('Error:', error);
 		return errorRes(res, 500, error);
 	}
 });

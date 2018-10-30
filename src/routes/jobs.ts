@@ -6,6 +6,7 @@ import { Member } from '../models/member';
 import { Job } from '../models/job';
 import { auth, hasPermissions } from '../middleware/passport';
 import { successRes, errorRes, memberMatches } from '../utils';
+import { logger } from '../utils/logger';
 export const router = express.Router();
 
 // TODO: Deprecate jobs route and merge with locations
@@ -17,7 +18,7 @@ router.get('/', async (req, res) => {
 			.exec();
 		return successRes(res, jobs);
 	} catch (error) {
-		console.error(error.message);
+		logger.error(error.message);
 		return errorRes(res, 500, error.message);
 	}
 });
@@ -105,7 +106,7 @@ router.post('/', auth(), async (req, res) => {
 		const ret = await job.populate('location').execPopulate();
 		return successRes(res, job.toJSON());
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error);
 	}
 });
@@ -182,7 +183,7 @@ router.delete('/:id', auth(), async (req, res) => {
 
 		return successRes(res, job);
 	} catch (error) {
-		console.error('Error:', error);
+		logger.error('Error:', error);
 		return errorRes(res, 500, error);
 	}
 });

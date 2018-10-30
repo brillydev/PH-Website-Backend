@@ -2,6 +2,7 @@ import * as express from 'express';
 import { Member } from '../models/member';
 import { Location } from '../models/location';
 import { successRes, errorRes, escapeRegEx } from '../utils';
+import { logger } from '../utils/logger';
 export const router = express.Router();
 
 router.get('/members', async (req, res) => {
@@ -23,7 +24,7 @@ router.get('/members', async (req, res) => {
 			.exec();
 		return successRes(res, members);
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error);
 	}
 });
@@ -44,7 +45,7 @@ router.get('/locations', async (req, res) => {
 			.exec();
 		return successRes(res, locations);
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error);
 	}
 });

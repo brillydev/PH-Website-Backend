@@ -11,7 +11,7 @@ const start = async () => {
 		});
 		return server;
 	} catch (error) {
-		console.error('Error:', error);
+		logger.error('Error:', error);
 		return null;
 	}
 };

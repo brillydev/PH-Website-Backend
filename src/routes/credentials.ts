@@ -4,6 +4,7 @@ import CONFIG from '../config';
 import { Credential } from '../models/credential';
 import { auth, hasPermissions } from '../middleware/passport';
 import { successRes, errorRes } from '../utils';
+import { logger } from '../utils/logger';
 export const router = express.Router();
 
 router.get('/', auth(), hasPermissions(['credentials']), async (req, res) => {
@@ -14,7 +15,7 @@ router.get('/', auth(), hasPermissions(['credentials']), async (req, res) => {
 			secret: CONFIG.CREDENTIAL_SECRET
 		});
 	} catch (error) {
-		console.error(error.message);
+		logger.error(error.message);
 		return errorRes(res, 500, error.message);
 	}
 });
@@ -39,7 +40,7 @@ router.post('/', auth(), hasPermissions(['credentials']), async (req, res) => {
 			secret: CONFIG.CREDENTIAL_SECRET
 		});
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error);
 	}
 });

@@ -6,6 +6,7 @@ import CONFIG from '../config';
 import { Member } from '../models/member';
 import { Permission } from '../models/permission';
 import { auth } from '../middleware/passport';
+import { logger } from '../utils/logger';
 import {
 	successRes,
 	errorRes,
@@ -55,7 +56,7 @@ export const router = express.Router();
 // 			token
 // 		});
 // 	} catch (error) {
-// 		console.error(error);
+// 		logger.error(error);
 // 		return errorRes(res, 500, error);
 // 	}
 // });
@@ -184,7 +185,7 @@ router.post('/signup', multer.any(), async (req, res, next) => {
 			token
 		});
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error);
 	}
 });
@@ -221,7 +222,7 @@ router.post('/login', async (req, res) => {
 			token
 		});
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error);
 	}
 });
@@ -250,7 +251,7 @@ router.get('/me', auth(), async (req, res) => {
 			token
 		});
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error);
 	}
 });
@@ -278,7 +279,7 @@ router.post('/forgot', async (req, res) => {
 			`A link to reset your password has been sent to: ${email}`
 		);
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error);
 	}
 });

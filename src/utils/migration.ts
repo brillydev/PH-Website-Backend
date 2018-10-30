@@ -2,6 +2,7 @@ import Server from '../server';
 import CONFIG from '../config';
 import { Member } from '../models/member';
 import { Event } from '../models/event';
+import { logger } from './logger';
 
 let server: Server;
 
@@ -12,9 +13,9 @@ const start = async () => {
 		// const members = await Member.find()
 		// 	// .limit(1)
 		// 	.exec();
-		// // console.log('Members:', members);
+		// // logger.log('Members:', members);
 		// members.forEach(member => {
-		// 	console.log(member.privateProfile);
+		// 	logger.log(member.privateProfile);
 		// });
 		// for (const member of members) {
 		// 	const update = await server.mongoose.connection.db
@@ -28,7 +29,7 @@ const start = async () => {
 		// 			}
 		// 		);
 
-		// 	console.log('Updated:', update);
+		// 	logger.log('Updated:', update);
 		// 	// await Member.findByIdAndUpdate(member._id, {
 		// 	// 	$set: {
 		// 	// 		createdAt: new Date((member as any).createdAt)
@@ -40,10 +41,10 @@ const start = async () => {
 		// const events = await Event.find()
 		// 	// .limit(1)
 		// 	.exec();
-		// // console.log('Members:', members);
+		// // logger.log('Members:', members);
 		// // events.forEach(event => {
-		// // 	console.log(event);
-		// // 	// console.log(event.createdAt);
+		// // 	logger.log(event);
+		// // 	// logger.log(event.createdAt);
 		// // });
 		// for (const event of events) {
 		// 	const update = await server.mongoose.connection.db
@@ -57,10 +58,10 @@ const start = async () => {
 		// 			}
 		// 		);
 
-		// 	// console.log('Updated:', update);
+		// 	// logger.log('Updated:', update);
 		// }
 	} catch (error) {
-		console.error('Error:', error);
+		logger.error('Error:', error);
 	} finally {
 		await server.mongoose.disconnect();
 	}

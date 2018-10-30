@@ -4,6 +4,7 @@ import { IPermissionModel, Permission } from '../models/permission';
 import { Member } from '../models/member';
 import { auth, hasPermissions } from '../middleware/passport';
 import { successRes, errorRes, to, addMemberToPermission } from '../utils';
+import { logger } from '../utils/logger';
 export const router = express.Router();
 
 // TODO: Add logic to delete permissons from members document when deleting a permission
@@ -15,7 +16,7 @@ router.get('/', auth(), hasPermissions(['permissions']), async (req, res) => {
 			.exec()
 	);
 	if (error) {
-		console.error(error.message);
+		logger.error(error.message);
 		return errorRes(res, 500, 'Error getting permissions');
 	}
 	return successRes(res, permissions);
@@ -34,7 +35,7 @@ router.post('/', auth(), hasPermissions(['permissions']), async (req, res) => {
 		await permission.save();
 		return successRes(res, permission);
 	} catch (error) {
-		console.error(error.message);
+		logger.error(error.message);
 		return errorRes(res, 500, error.message);
 	}
 });
@@ -59,7 +60,7 @@ router.get(
 				.exec()
 		);
 		if (error) {
-			console.error(error.message);
+			logger.error(error.message);
 			return errorRes(res, 500, 'Error getting permission');
 		}
 		return successRes(res, permission);
@@ -77,7 +78,7 @@ router.delete(
 			Permission.findById(req.params.id).exec()
 		);
 		if (error) {
-			console.error(error.message);
+			logger.error(error.message);
 			return errorRes(res, 500, 'Error getting permission');
 		}
 		if (permission) await permission.remove();
@@ -105,7 +106,7 @@ router.post('/:id', auth(), hasPermissions(['permissions']), async (req, res) =>
 		if (!member) return errorRes(res, 400, 'Member not found');
 		if (!permission) return errorRes(res, 400, 'Permission not found');
 		if (e) {
-			console.error(e.message);
+			logger.error(e.message);
 			return errorRes(res, 500, e.message);
 		}
 
@@ -147,7 +148,7 @@ router.post('/:id', auth(), hasPermissions(['permissions']), async (req, res) =>
 		// );
 
 		// if (e) {
-		// 	console.error(e.message);
+		// 	logger.error(e.message);
 		// 	return errorRes(res, 500, 'Error adding permission to member');
 		// }
 		return successRes(res, {
@@ -155,71 +156,71 @@ router.post('/:id', auth(), hasPermissions(['permissions']), async (req, res) =>
 			member
 		});
 	} catch (error) {
-		console.error(error.message);
+		logger.error(error.message);
 		return errorRes(res, 500, error);
 	}
 });
 
 // prettier-ignore
 router.delete('/:id/member/:memberID', auth(), hasPermissions(['permissions']), async (req, res) => {
-		const { id, memberID } = req.params;
-		if (!ObjectId.isValid(id)) return errorRes(res, 400, 'Invalid permision ID');
-		if (!ObjectId.isValid(memberID)) return errorRes(res, 400, 'Invalid member ID');
+	const { id, memberID } = req.params;
+	if (!ObjectId.isValid(id)) return errorRes(res, 400, 'Invalid permision ID');
+	if (!ObjectId.isValid(memberID)) return errorRes(res, 400, 'Invalid member ID');
 
-		let [[member, permission], e] = await to(
-			Promise.all([Member.findById(memberID).exec(), Permission.findById(id).exec()])
-		);
+	let [[member, permission], e] = await to(
+		Promise.all([Member.findById(memberID).exec(), Permission.findById(id).exec()])
+	);
 
-		if (!member) return errorRes(res, 400, 'Member not found');
-		if (!permission) return errorRes(res, 400, 'Permission not found');
-		if (e) {
-			console.error(e.message);
-			return errorRes(res, 500, e.message);
-		}
-
-		[[member, permission], e] = await to(
-			Promise.all([
-				Member.findByIdAndUpdate(
-					member._id,
-					{
-						$pull: {
-							permissions: permission._id
-						}
-					},
-					{ new: true }
-				).exec(),
-				Permission.findByIdAndUpdate(
-					permission._id,
-					{
-						$pull: {
-							members: {
-								member: member._id
-							}
-						}
-					},
-					{ new: true }
-				)
-					.populate({
-						path: 'members.member',
-						model: Member
-					})
-					.populate({
-						path: 'members.recordedBy',
-						model: Member
-					})
-					.exec()
-			])
-		);
-
-		if (e) {
-			console.error(e.message);
-			return errorRes(res, 500, 'Error adding member to permission');
-		}
-
-		return successRes(res, {
-			permission,
-			member
-		});
-
+	if (!member) return errorRes(res, 400, 'Member not found');
+	if (!permission) return errorRes(res, 400, 'Permission not found');
+	if (e) {
+		logger.error(e.message);
+		return errorRes(res, 500, e.message);
 	}
+
+	[[member, permission], e] = await to(
+		Promise.all([
+			Member.findByIdAndUpdate(
+				member._id,
+				{
+					$pull: {
+						permissions: permission._id
+					}
+				},
+				{ new: true }
+			).exec(),
+			Permission.findByIdAndUpdate(
+				permission._id,
+				{
+					$pull: {
+						members: {
+							member: member._id
+						}
+					}
+				},
+				{ new: true }
+			)
+				.populate({
+					path: 'members.member',
+					model: Member
+				})
+				.populate({
+					path: 'members.recordedBy',
+					model: Member
+				})
+				.exec()
+		])
+	);
+
+	if (e) {
+		logger.error(e.message);
+		return errorRes(res, 500, 'Error adding member to permission');
+	}
+
+	return successRes(res, {
+		permission,
+		member
+	});
+
+}
 );

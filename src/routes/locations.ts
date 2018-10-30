@@ -3,6 +3,7 @@ import { ObjectId } from 'mongodb';
 import { Location } from '../models/location';
 import { successRes, errorRes, to, hasPermission } from '../utils';
 import { auth, hasPermissions } from '../middleware/passport';
+import { logger } from '../utils/logger';
 import { Member } from '../models/member';
 export const router = express.Router();
 
@@ -16,7 +17,7 @@ router.get('/', async (req, res) => {
 
 		return successRes(res, locations);
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error);
 	}
 });
@@ -32,7 +33,7 @@ router.get('/:id', async (req, res) => {
 			.exec();
 		return successRes(res, location);
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error);
 	}
 });
@@ -53,10 +54,10 @@ router.post('/:id', auth(), hasPermissions(['admin']), async (req, res) => {
 		location.name = name;
 		location.city = city;
 		await location.save();
-		console.log(location);
+		logger.log(location);
 		return successRes(res, location);
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		return errorRes(res, 500, error);
 	}
 });

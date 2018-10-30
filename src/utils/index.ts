@@ -5,6 +5,7 @@ import * as Multer from 'multer';
 import { IMemberModel, Member } from '../models/member';
 import { Permission, IPermissionModel } from '../models/permission';
 import CONFIG from '../config';
+import { logger } from './logger';
 export * from './email';
 
 const storage = new GoogleCloudStorage({
@@ -103,7 +104,7 @@ export const uploadToStorage = async (
 		});
 
 		blobStream.on('error', error => {
-			console.error(error);
+			logger.error(error);
 			reject('Something is wrong! Unable to upload at the moment.');
 		});
 

@@ -54,7 +54,7 @@ router.post('/:id', auth(), hasPermissions(['admin']), async (req, res) => {
 		location.name = name;
 		location.city = city;
 		await location.save();
-		logger.log(location);
+		logger.info(location);
 		return successRes(res, location);
 	} catch (error) {
 		logger.error(error);

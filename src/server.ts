@@ -88,7 +88,7 @@ export default class Server {
 				{ useNewUrlParser: true }
 			);
 			this.mongoose.Promise = Promise;
-			winston.log('Connected to Mongo:', DB);
+			winston.info('Connected to Mongo:', DB);
 			return this.mongoose;
 		} catch (error) {
 			winston.error('Error connecting to mongo:', error);

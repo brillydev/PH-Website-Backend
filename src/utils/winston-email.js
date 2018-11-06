@@ -1,6 +1,5 @@
-const nodemailer = require('nodemailer');
-const Transport = require('winston-transport');
-const util = require('util');
+import * as nodemailer from 'nodemailer';
+import * as Transport from 'winston-transport';
 
 export class Mail extends Transport {
     constructor(options) {
@@ -22,14 +21,21 @@ export class Mail extends Transport {
             this.emit('logged', info);
         });
 
+        this.send(info);
+        callback();
+    };
+
+    send(info) {
         this.mail.sendMail({
             from: 'brillytest@gmail.com',
             to: 'prakrit_duangsutha@outlook.com',
             subject: 'PH-LOG',
-            text: JSON.stringify(info)
+            text: JSON.stringify(info, null, '\t')
         },
-            (err, info) => { console.log(err, info) });
-    };
+            (err, info) => {
+                console.log(err, info)
+            }
+        );
+    }
 
-    callback();
 };

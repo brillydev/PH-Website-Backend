@@ -8,17 +8,17 @@
 
 import { createLogger, format, transports } from 'winston';
 import { Mail } from './winston-email';
-import util from 'util';
 
 const { combine, timestamp, printf } = format;
 
 const customFormat = printf(info => {
-    return `${info.level}: ${info.message}\n\n${JSON.stringify(info.meta)}\n\n${info.timestamp}`
+    // eslint-disable-next-line prettier/prettier
+    info => `${info.level}: ${info.message}\n\n${JSON.stringify(info.meta, null, '\t')}\n\n${info.timestamp}`
 });
 
 // FIXME: Configure transport options for backend
-// const transport = new Mail();
-const transport = new transports.Console();
+const transport = new Mail();
+//const transport = new transports.Console();
 
 export const logger = createLogger({
     transports: [transport],

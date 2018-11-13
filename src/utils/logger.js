@@ -21,14 +21,13 @@ const customConsoleFormat = printf(
     )}\n\n`
 );
 
+// FIXME: the format can't be passed into Mail() class in winston-email.js
 const customMailFormat = printf(
   // eslint-disable-next-line prettier/prettier
   info =>
-    `[${info.level}]: [${info.timestamp}]\n\n${info.message} ${JSON.stringify(
-      info.meta,
-      null,
-      2
-    )}\n\n`
+    `[${info.level.toUpperCase()}]: [${info.timestamp}]\n\n${info.message} ${
+      info.meta
+    }\n\n`
 );
 
 const transport = [

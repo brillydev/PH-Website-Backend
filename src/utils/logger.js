@@ -6,27 +6,57 @@
  *                        and logger.error instead of console.error.
  */
 
-import { createLogger, format, transports } from 'winston';
-import { Mail } from './winston-email';
+import { createLogger, format, transports } from "winston";
+import { Mail } from "./winston-email";
+import CONFIG from "../config";
+import * as strip from "strip-ansi";
+let util = require("util");
 
-const { combine, timestamp, printf } = format;
+const { combine, timestamp, printf, colorize } = format;
 
-const customFormat = printf(info => {
-    // eslint-disable-next-line prettier/prettier
-    info => `${info.level}: ${info.message}\n\n${JSON.stringify(info.meta, null, '\t')}\n\n${info.timestamp}`
-});
+const customConsoleFormat = printf(
+  // eslint-disable-next-line prettier/prettier
+  info =>
+    `${info.level}: ${info.message}\n\n${util.inspect(info.meta)}\n\n${
+      info.timestamp
+    }\n`
+);
 
-// FIXME: Configure transport options for backend
-const transport = new Mail();
-//const transport = new transports.Console();
+const customMailFormat = printf(
+  // eslint-disable-next-line prettier/prettier
+  info =>
+    `${info.level}: ${info.message}\n\n${JSON.stringify(
+      info.meta,
+      null,
+      2
+    )}\n\n${info.timestamp}\n`
+);
+
+const transport = [
+  new transports.Console({
+    format: combine(
+      format(info => {
+        info.level = info.level.toUpperCase();
+        return info;
+      })(),
+      colorize(),
+      format.splat(),
+      timestamp(),
+      customConsoleFormat
+    )
+  })
+];
+
+if (CONFIG.NODE_ENV === "production")
+  transport.push(
+    new Mail({ format: combine(format.splat(), timestamp(), customMailFormat) })
+  );
 
 export const logger = createLogger({
-    transports: [transport],
-    format: combine(
-        format.splat(),
-        timestamp(),
-        customFormat
-    )
+  transports: transport,
+  silent: CONFIG.NODE_ENV === "test"
 });
 
-logger.on('error', (err) => { console.log('Logger Error:', err) });
+logger.on("error", err => {
+  console.log("Logger Error:", err);
+});

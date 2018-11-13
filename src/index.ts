@@ -7,7 +7,7 @@ const start = async () => {
 	try {
 		const server = await Server.createInstance();
 		server.app.listen(PORT, () => {
-			logger.info('CONFIG: ', CONFIG, `\nListening on port: ${PORT}`);
+			logger.info('CONFIG: ', CONFIG, `Listening on port: ${PORT}`);
 		});
 		return server;
 	} catch (error) {

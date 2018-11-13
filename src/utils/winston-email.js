@@ -1,17 +1,18 @@
 import * as nodemailer from 'nodemailer';
 import * as Transport from 'winston-transport';
+import CONFIG from '../config';
 
 export class Mail extends Transport {
     constructor(options) {
         super(options);
 
         this.mail = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
+            host: 'smtp.sendgrid.net',
             port: 465,
             secure: true,
             auth: {
-                user: 'brillytest@gmail.com',
-                pass: 'Abcdef123?'
+                user: 'apikey',
+                pass: CONFIG.SENDGRID_KEY
             }
         });
     }

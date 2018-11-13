@@ -9,17 +9,15 @@
 import { createLogger, format, transports } from "winston";
 import { Mail } from "./winston-email";
 import CONFIG from "../config";
-let util = require("util");
+import * as colorJSON from "json-colorizer";
 
 const { combine, timestamp, printf, colorize } = format;
 
 const customConsoleFormat = printf(
   // eslint-disable-next-line prettier/prettier
   info =>
-    `[${info.level}]: [${info.timestamp}]\n\n${info.message} ${JSON.stringify(
-      info.meta,
-      null,
-      2
+    `[${info.level}]: [${info.timestamp}]\n\n${info.message} ${colorJSON(
+      JSON.stringify(info.meta, null, 2)
     )}\n\n`
 );
 

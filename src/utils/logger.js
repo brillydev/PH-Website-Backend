@@ -9,7 +9,6 @@
 import { createLogger, format, transports } from "winston";
 import { Mail } from "./winston-email";
 import CONFIG from "../config";
-import * as strip from "strip-ansi";
 let util = require("util");
 
 const { combine, timestamp, printf, colorize } = format;
@@ -17,19 +16,21 @@ const { combine, timestamp, printf, colorize } = format;
 const customConsoleFormat = printf(
   // eslint-disable-next-line prettier/prettier
   info =>
-    `${info.level}: ${info.message}\n\n${util.inspect(info.meta)}\n\n${
-      info.timestamp
-    }\n`
+    `[${info.level}]: [${info.timestamp}]\n\n${info.message} ${JSON.stringify(
+      info.meta,
+      null,
+      2
+    )}\n\n`
 );
 
 const customMailFormat = printf(
   // eslint-disable-next-line prettier/prettier
   info =>
-    `${info.level}: ${info.message}\n\n${JSON.stringify(
+    `[${info.level}]: [${info.timestamp}]\n\n${info.message} ${JSON.stringify(
       info.meta,
       null,
       2
-    )}\n\n${info.timestamp}\n`
+    )}\n\n`
 );
 
 const transport = [

@@ -30,8 +30,8 @@ export class Mail extends Transport {
   send(info) {
     this.mail.sendMail(
       {
-        from: "reports@purduehackers.com",
-        to: "destination@email.com",
+        from: "Purdue Hackers <reports@purduehackers.com>",
+        to: "your@email.com",
         subject: `[PH-LOG] [${info.level.toUpperCase()}] ${info.message}`,
         text: JSON.stringify(info, null, 2)
       },

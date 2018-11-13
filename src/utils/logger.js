@@ -16,7 +16,7 @@ const { combine, timestamp, printf, colorize } = format;
 const customConsoleFormat = printf(
   // eslint-disable-next-line prettier/prettier
   info =>
-    `[${info.level}]: [${info.timestamp}]\n\n${info.message} ${colorJSON(
+    `[${info.level}] [${info.timestamp}]\n\n${info.message} ${colorJSON(
       JSON.stringify(info.meta, null, 2)
     )}\n\n`
 );
@@ -25,7 +25,7 @@ const customConsoleFormat = printf(
 const customMailFormat = printf(
   // eslint-disable-next-line prettier/prettier
   info =>
-    `[${info.level.toUpperCase()}]: [${info.timestamp}]\n\n${info.message} ${
+    `[${info.level.toUpperCase()}] [${info.timestamp}]\n\n${info.message} ${
       info.meta
     }\n\n`
 );
@@ -45,7 +45,7 @@ const transport = [
   })
 ];
 
-if (CONFIG.NODE_ENV === "production")
+if (CONFIG.NODE_ENV === "development")
   transport.push(
     new Mail({ format: combine(format.splat(), timestamp(), customMailFormat) })
   );

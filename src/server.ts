@@ -19,7 +19,8 @@ import { router as locations } from './routes/locations';
 import { router as credentials } from './routes/credentials';
 import { router as permissions } from './routes/permissions';
 import { router as autocomplete } from './routes/autocomplete';
-import { router as email } from './routes/email';
+import { router as reports } from './routes/reports';
+
 import { errorRes } from './utils';
 import { logger as winston } from './utils/logger';
 const { NODE_ENV, DB } = CONFIG;
@@ -47,9 +48,7 @@ export default class Server {
 		this.app.use(helmet());
 		if (NODE_ENV === 'production') this.app.use(yes());
 		if (NODE_ENV !== 'test')
-			NODE_ENV !== 'production'
-				? this.app.use(logger('dev'))
-				: this.app.use(logger('tiny'));
+			NODE_ENV !== 'production' ? this.app.use(logger('dev')) : this.app.use(logger('tiny'));
 		this.app.use(express.json());
 		this.app.use(express.urlencoded({ extended: true }));
 		this.app.use(cookieParser());
@@ -69,7 +68,7 @@ export default class Server {
 		this.app.use('/api/credentials', credentials);
 		this.app.use('/api/permissions', permissions);
 		this.app.use('/api/autocomplete', autocomplete);
-		this.app.use('/api/email', email);
+		this.app.use('/api/report', reports);
 
 		// Serves react app, only used in production
 		this.app.get('*', (req, res) =>

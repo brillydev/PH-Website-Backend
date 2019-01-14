@@ -102,8 +102,7 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
 	try {
-		if (!ObjectId.isValid(req.params.id))
-			return errorRes(res, 400, 'Invalid member ID');
+		if (!ObjectId.isValid(req.params.id)) return errorRes(res, 400, 'Invalid member ID');
 		const member = await Member.findById(req.params.id)
 			.populate({
 				path: 'permissions',
@@ -120,20 +119,21 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', auth(), multer.any(), async (req, res) => {
 	try {
-		if (!ObjectId.isValid(req.params.id))
-			return errorRes(res, 400, 'Invalid member ID');
+		if (!ObjectId.isValid(req.params.id)) return errorRes(res, 400, 'Invalid member ID');
 		if (!memberMatches(req.user, req.params.id))
 			return errorRes(res, 401, 'You are unauthorized to edit this profile');
 
 		const files: Express.Multer.File[] = req.files
 			? (req.files as Express.Multer.File[])
 			: new Array<Express.Multer.File>();
+
 		const {
 			name,
 			email,
 			password,
 			passwordConfirm,
 			graduationYear,
+			createdAt,
 			privateProfile,
 			unsubscribed,
 			phone,
@@ -147,13 +147,11 @@ router.put('/:id', auth(), multer.any(), async (req, res) => {
 			devpost,
 			resumeLink
 		} = req.body;
-		if (!name)
-			return errorRes(res, 400, 'Please provide your first and last name');
+		if (!name) return errorRes(res, 400, 'Please provide your first and last name');
 		if (!email) return errorRes(res, 400, 'Please provide your email');
 		if (!isEmail(email)) return errorRes(res, 400, 'Invalid email');
 		if (!password) return errorRes(res, 400, 'A password is required');
-		if (!passwordConfirm)
-			return errorRes(res, 400, 'Please confirm your password');
+		if (!passwordConfirm) return errorRes(res, 400, 'Please confirm your password');
 		if (!graduationYear || !parseInt(graduationYear, 10))
 			return errorRes(res, 400, 'Please provide a valid graduation year');
 		if (
@@ -179,18 +177,14 @@ router.put('/:id', auth(), multer.any(), async (req, res) => {
 			return errorRes(res, 400, 'Please provide a valid major');
 		if (phone && !isMobilePhone(phone, ['en-US'] as any))
 			return errorRes(res, 400, 'Invalid phone number: ' + phone);
-		if (password !== passwordConfirm)
-			return errorRes(res, 400, 'Passwords does not match');
+		if (password !== passwordConfirm) return errorRes(res, 400, 'Passwords does not match');
 		if (facebook && !/(facebook|fb)/.test(facebook))
 			return errorRes(res, 400, 'Invalid Facebook URL');
-		if (github && !/github/.test(github))
-			return errorRes(res, 400, 'Invalid GitHub URL');
+		if (github && !/github/.test(github)) return errorRes(res, 400, 'Invalid GitHub URL');
 		if (linkedin && !/linkedin/.test(linkedin))
 			return errorRes(res, 400, 'Invalid LinkedIn URL');
-		if (devpost && !/devpost/.test(devpost))
-			return errorRes(res, 400, 'Invalid Devpost URL');
-		if (website && !isURL(website))
-			return errorRes(res, 400, 'Invalid website URL');
+		if (devpost && !/devpost/.test(devpost)) return errorRes(res, 400, 'Invalid Devpost URL');
+		if (website && !isURL(website)) return errorRes(res, 400, 'Invalid website URL');
 		const member = await Member.findById(req.params.id, '+password').exec();
 		if (!member) return errorRes(res, 400, 'Member not found');
 		if (!compareSync(password, member.password))
@@ -198,10 +192,8 @@ router.put('/:id', auth(), multer.any(), async (req, res) => {
 
 		const picture = files.find(file => file.fieldname === 'picture');
 		const resume = files.find(file => file.fieldname === 'resume');
-		if (picture)
-			member.picture = await uploadToStorage(picture, 'pictures', member);
-		if (resume)
-			member.resume = await uploadToStorage(resume, 'resumes', member);
+		if (picture) member.picture = await uploadToStorage(picture, 'pictures', member);
+		if (resume) member.resume = await uploadToStorage(resume, 'resumes', member);
 		member.name = name;
 		member.email = email;
 		member.password = password;
@@ -229,44 +221,33 @@ router.put('/:id', auth(), multer.any(), async (req, res) => {
 	}
 });
 
-router.post(
-	'/organizer',
-	auth(),
-	hasPermissions(['permissions']),
-	async (req, res) => {
-		try {
-			const { email } = req.body;
-			if (!email)
-				return errorRes(res, 400, 'Please enter member name or email');
-			const permissions = await Permission.find()
-				.where('organizer')
-				.ne(0)
-				.exec();
+router.post('/organizer', auth(), hasPermissions(['permissions']), async (req, res) => {
+	try {
+		const { email } = req.body;
+		if (!email) return errorRes(res, 400, 'Please enter member name or email');
+		const permissions = await Permission.find()
+			.where('organizer')
+			.ne(0)
+			.exec();
 
-			const member = await Member.findOne({
-				$or: [{ name: email }, { email }]
-			}).exec();
+		const member = await Member.findOne({
+			$or: [{ name: email }, { email }]
+		}).exec();
 
-			if (!member) return errorRes(res, 400, 'Member not found');
+		if (!member) return errorRes(res, 400, 'Member not found');
 
-			const [m, p] = await addMemberToPermissions(
-				member,
-				permissions,
-				req.user
-			);
+		const [m, p] = await addMemberToPermissions(member, permissions, req.user);
 
-			return successRes(res, { member: m, permissions: p });
-		} catch (error) {
-			logger.error(error);
-			return errorRes(res, 500, error);
-		}
+		return successRes(res, { member: m, permissions: p });
+	} catch (error) {
+		logger.error(error);
+		return errorRes(res, 500, error);
 	}
-);
+});
 
 router.delete('/:id', auth(), hasPermissions(['admin']), async (req, res) => {
 	try {
-		if (!ObjectId.isValid(req.params.id))
-			return errorRes(res, 400, 'Invalid member ID');
+		if (!ObjectId.isValid(req.params.id)) return errorRes(res, 400, 'Invalid member ID');
 
 		const [member, jobs] = await Promise.all([
 			Member.findById(req.params.id, '_id')
@@ -294,10 +275,7 @@ router.delete('/:id', auth(), hasPermissions(['admin']), async (req, res) => {
 				])
 				.exec(),
 			Job.find()
-				.populate([
-					{ path: 'member', select: '_id' },
-					{ path: 'location', select: '_id' }
-				])
+				.populate([{ path: 'member', select: '_id' }, { path: 'location', select: '_id' }])
 				.exec()
 		]);
 
@@ -321,15 +299,11 @@ router.delete('/:id', auth(), hasPermissions(['admin']), async (req, res) => {
 			location.members = location.members.filter(
 				locationMember => !locationMember.member._id.equals(member._id)
 			);
-			location.members.length
-				? await location.save()
-				: await location.remove();
+			location.members.length ? await location.save() : await location.remove();
 		}
 
 		await Promise.all(
-			jobs
-				.filter(job => job.member._id.equals(member._id))
-				.map(job => job.remove())
+			jobs.filter(job => job.member._id.equals(member._id)).map(job => job.remove())
 		);
 
 		await member.remove();
@@ -343,8 +317,7 @@ router.delete('/:id', auth(), hasPermissions(['admin']), async (req, res) => {
 
 router.get('/:id/events', async (req, res) => {
 	try {
-		if (!ObjectId.isValid(req.params.id))
-			return errorRes(res, 400, 'Invalid member ID');
+		if (!ObjectId.isValid(req.params.id)) return errorRes(res, 400, 'Invalid member ID');
 		const member = await Member.findById(req.params.id)
 			.populate({
 				path: 'events',
@@ -366,8 +339,7 @@ router.get('/:id/events', async (req, res) => {
 
 router.get('/:id/locations', async (req, res) => {
 	try {
-		if (!ObjectId.isValid(req.params.id))
-			return errorRes(res, 400, 'Invalid member ID');
+		if (!ObjectId.isValid(req.params.id)) return errorRes(res, 400, 'Invalid member ID');
 		const member = await Member.findById(req.params.id)
 			.populate({
 				path: 'locations.location',
